@@ -1,0 +1,21 @@
+plugins {
+  id 'java'
+}
+
+group 'org.logstash.beats.pqc'
+version "${new File("VERSION").text.trim()}"
+
+description = "PQC Beats input skeleton"
+
+java {
+  sourceCompatibility = JavaVersion.VERSION_1_8
+  targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+repositories {
+  mavenCentral()
+}
+
+tasks.withType(JavaCompile) {
+  options.encoding = 'UTF-8'
+}
