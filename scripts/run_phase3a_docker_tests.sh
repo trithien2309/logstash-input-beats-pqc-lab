@@ -94,7 +94,7 @@ run_validation_case() {
 
   [[ $ec -ne 0 ]] || fail "Case ${name} unexpectedly passed. See ${logfile}"
   for pattern in "${patterns[@]}"; do
-    if grep -Fq "$pattern" "$logfile"; then
+    if grep -Eq "$pattern" "$logfile"; then
       return
     fi
   done
@@ -150,7 +150,10 @@ main() {
   cleanup_logstash_container
 
   run_validation_case "valid-config" "${VALID_CONF}" true
-  run_validation_case "bad-group" "${PIPELINE_DIR}/beats-pqc-bad-group.conf" false "Expected one of [X25519MLKEM768]" "pqc_hybrid_group must be X25519MLKEM768"
+  run_validation_case "bad-group" "${PIPELINE_DIR}/beats-pqc-bad-group.conf" false \
+    "Expected one of .*X25519MLKEM768" \
+    "ConfigurationError" \
+    "The given configuration is invalid"
   run_validation_case "bad-fallback" "${PIPELINE_DIR}/beats-pqc-bad-fallback.conf" false "pqc_allow_fallback must be false when pqc_require is true"
   run_validation_case "bad-require" "${PIPELINE_DIR}/beats-pqc-bad-require.conf" false "pqc_require must be true for strict PQC transport"
   run_validation_case "bad-disabled" "${PIPELINE_DIR}/beats-pqc-bad-disabled.conf" false "pqc_enabled must be true for beats_pqc"
