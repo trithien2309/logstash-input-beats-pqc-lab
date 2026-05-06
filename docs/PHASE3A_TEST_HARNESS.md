@@ -32,6 +32,7 @@ chmod +x scripts/run_phase3a_docker_tests.sh
   - bad key path
   - client auth required but missing CA
 - cleans up any existing `logstash` test container before it starts
+- clears old logs from `test-results/phase3a` before each run
 - runs `config.test_and_exit` for all validation cases first
 - starts the `logstash` container with the valid config only after validation finishes
 - checks for:
@@ -41,6 +42,7 @@ chmod +x scripts/run_phase3a_docker_tests.sh
 - writes actual output logs to:
   `~/phase3/logstash-input-beats-pqc-lab/test-results/phase3a`
 - removes the test `logstash` container on exit so port `5044` is released even if a test fails
+- continues through the full test matrix and prints a final pass/fail summary at the end
 
 ### Pass Criteria
 
