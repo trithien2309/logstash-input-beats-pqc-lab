@@ -20,6 +20,12 @@ fail() {
   exit 1
 }
 
+cleanup_logstash_container() {
+  docker rm -f "${LOGSTASH_CONTAINER}" >/dev/null 2>&1 || true
+}
+
+trap cleanup_logstash_container EXIT
+
 assert_file() {
   local path="$1"
   [[ -e "$path" ]] || fail "Required path not found: $path"
@@ -98,6 +104,7 @@ run_validation_case() {
 
 run_listener_test() {
   local listener_log="${RESULTS_DIR}/listener-start.log"
+  cleanup_logstash_container
   "${COMPOSE_CMD[@]}" up -d logstash --force-recreate >/dev/null
 
   local found_registered="false"
@@ -140,9 +147,9 @@ main() {
 
   copy_template
   create_negative_configs
+  cleanup_logstash_container
 
   run_validation_case "valid-config" "${VALID_CONF}" true
-  run_listener_test
   run_validation_case "bad-group" "${PIPELINE_DIR}/beats-pqc-bad-group.conf" false "Expected one of [X25519MLKEM768]" "pqc_hybrid_group must be X25519MLKEM768"
   run_validation_case "bad-fallback" "${PIPELINE_DIR}/beats-pqc-bad-fallback.conf" false "pqc_allow_fallback must be false when pqc_require is true"
   run_validation_case "bad-require" "${PIPELINE_DIR}/beats-pqc-bad-require.conf" false "pqc_require must be true for strict PQC transport"
@@ -150,6 +157,7 @@ main() {
   run_validation_case "bad-cert" "${PIPELINE_DIR}/beats-pqc-bad-cert.conf" false "File does not exist or cannot be opened" "Something is wrong with your configuration."
   run_validation_case "bad-key" "${PIPELINE_DIR}/beats-pqc-bad-key.conf" false "File does not exist or cannot be opened" "Something is wrong with your configuration."
   run_validation_case "bad-client-auth" "${PIPELINE_DIR}/beats-pqc-bad-client-auth.conf" false "ssl_certificate_authorities is required when ssl_client_authentication is 'required'"
+  run_listener_test
 
   echo
   echo "Phase 3A docker tests completed successfully."

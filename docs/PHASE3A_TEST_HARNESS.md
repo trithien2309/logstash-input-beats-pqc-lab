@@ -31,14 +31,16 @@ chmod +x scripts/run_phase3a_docker_tests.sh
   - bad cert path
   - bad key path
   - client auth required but missing CA
-- runs `config.test_and_exit` for all validation cases
-- starts the `logstash` container with the valid config
+- cleans up any existing `logstash` test container before it starts
+- runs `config.test_and_exit` for all validation cases first
+- starts the `logstash` container with the valid config only after validation finishes
 - checks for:
   - `Registered beats_pqc input`
   - `beats_pqc skeleton listener started`
 - verifies host port `5044` with `nc -vz 127.0.0.1 5044`
 - writes actual output logs to:
   `~/phase3/logstash-input-beats-pqc-lab/test-results/phase3a`
+- removes the test `logstash` container on exit so port `5044` is released even if a test fails
 
 ### Pass Criteria
 
